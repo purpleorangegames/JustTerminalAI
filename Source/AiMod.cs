@@ -17,7 +17,7 @@ public class AiSettings : ModSettings
     // edit commands wait for y
     public bool askFirst = true;
     // how many times it can go back and forth before it stops
-    public int maxSteps = 10;
+    public int maxSteps = 25;
     public int timeout = 180;
     // tool calls, off for servers that don't have them, then it answers in look: and run: lines
     public bool tools = true;
@@ -30,7 +30,7 @@ public class AiSettings : ModSettings
         Scribe_Values.Look(ref model, "model", "");
         Scribe_Values.Look(ref apiKey, "apiKey", "");
         Scribe_Values.Look(ref askFirst, "askFirst", true);
-        Scribe_Values.Look(ref maxSteps, "maxSteps", 10);
+        Scribe_Values.Look(ref maxSteps, "maxSteps", 25);
         Scribe_Values.Look(ref timeout, "timeout", 180);
         Scribe_Values.Look(ref tools, "tools", true);
         Scribe_Values.Look(ref think, "think", false);

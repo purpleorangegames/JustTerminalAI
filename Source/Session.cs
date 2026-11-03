@@ -135,7 +135,7 @@ public class Session
     {
         if (++steps > AiMod.Settings.maxSteps)
         {
-            sh.Print($"ai stopped after {AiMod.Settings.maxSteps} steps", Ink.Warn);
+            sh.Print($"ai stopped after {AiMod.Settings.maxSteps} steps, ask again in fewer words or raise the steps in the mod options", Ink.Warn);
             return;
         }
         List<JsonObject> messages = new List<JsonObject> { Message("system", Prompt.Build()) };
