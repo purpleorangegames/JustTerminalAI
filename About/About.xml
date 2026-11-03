@@ -35,5 +35,7 @@ It needs a model server running, anything that answers like OpenAI: vLLM, llama.
 
 Small models get things wrong more often, a 7B or bigger works better. Keep ask first on.
 
+AI was used to help code/fix issues
+
 Non Steam version: https://github.com/purpleorangegames/JustTerminalAI</description>
 </ModMetaData>
