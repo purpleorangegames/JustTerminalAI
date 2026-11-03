@@ -30,6 +30,8 @@ public class Session
 
     private readonly Shell sh;
     private int steps;
+    // a at the question: yes to everything for the rest of this line or session
+    private bool yesToAll;
     // a session ends when another game is loaded
     private Game game;
 
@@ -67,6 +69,13 @@ public class Session
             Memory.Remember(sh, string.Join(" ", args.Skip(1)));
             return;
         }
+        if (first == "ask" && args.Length == 2 && args[1].ToLowerInvariant() is "on" or "off")
+        {
+            AiMod.Settings.askFirst = args[1].ToLowerInvariant() == "on";
+            AiMod.Instance.WriteSettings();
+            sh.Print(AiMod.Settings.askFirst ? "ai asks before changing things" : "ai changes things without asking now, ai ask on asks again", AiMod.Settings.askFirst ? Ink.Good : Ink.Warn);
+            return;
+        }
         if (first == "memory" && args.Length == 1)
         {
             sh.App = new MemoryApp();
@@ -83,6 +92,10 @@ public class Session
             }
             sh.Print();
             sh.Print("talk to it, it remembers until you leave. exit or ctrl+c leaves", Ink.Dim);
+            if (!AiMod.Settings.askFirst)
+            {
+                sh.Print("it runs changes without asking, ai ask on turns that off", Ink.Warn);
+            }
             sh.Mode = new ShellMode
             {
                 prompt = "ai> ",
@@ -300,7 +313,7 @@ public class Session
             Reply(items);
             return;
         }
-        if (!AiMod.Settings.askFirst)
+        if (!AiMod.Settings.askFirst || yesToAll)
         {
             Do(items, waiting);
             return;
@@ -310,10 +323,14 @@ public class Session
         {
             sh.Print("  " + (c.kind == "write" ? $"write {c.text} ({c.body.Split('\n').Length} lines)" : c.kind == "remember" ? "remember: " + c.text : c.text), Ink.Bright);
         }
-        sh.AskLine("run them? y/n", answer =>
+        sh.AskLine("run them? y/n, a for yes to all", answer =>
         {
             answer = answer.Trim().ToLowerInvariant();
-            if (answer == "y" || answer == "yes")
+            if (answer is "a" or "all")
+            {
+                yesToAll = true;
+            }
+            if (answer is "y" or "yes" or "a" or "all")
             {
                 Do(items, waiting);
                 return;
@@ -384,7 +401,7 @@ public class Session
             return bad;
         }
         string[] words = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (changing.Contains(words[0]) || words[0].Equals("cron", StringComparison.OrdinalIgnoreCase) && words.Length > 2 && words[2] != "test")
+        if (changing.Contains(words[0]) || words[0].Equals("cron", StringComparison.OrdinalIgnoreCase) && words.Length > 2 && words[2] != "test" || words[0].Equals("place", StringComparison.OrdinalIgnoreCase) && words.Length > 1)
         {
             return words[0] + " changes things, use change for it";
         }

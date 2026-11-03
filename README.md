@@ -14,4 +14,6 @@ Each `ai` line starts fresh. `ai session` turns the screen red with an `ai>` pro
 
 It needs a server that answers like OpenAI's chat completions: vLLM, llama.cpp server, LM Studio or Ollama. The address is in the mod options, the default is http://127.0.0.1:8080/v1. It uses tool calls, and for servers without them there's an option to answer in plain lines instead. Thinking is off by default, it's slower and some models think until they run out of tokens.
 
+Tests/requests.txt has the requests to try after a change, with what should happen.
+
 Build with `dotnet build -c Release` in Source, it needs JustTerminal next to it in the same folder.

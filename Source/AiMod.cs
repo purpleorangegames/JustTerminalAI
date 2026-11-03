@@ -40,6 +40,7 @@ public class AiSettings : ModSettings
 public class AiMod : Mod
 {
     public static AiSettings Settings;
+    public static AiMod Instance;
 
     private string stepsBuffer;
     private string timeoutBuffer;
@@ -47,11 +48,12 @@ public class AiMod : Mod
 
     public AiMod(ModContentPack content) : base(content)
     {
+        Instance = this;
         Settings = GetSettings<AiSettings>();
         Commands.All.Add(new Command
         {
             name = "ai",
-            args = "<what you want>|session|remember <text>|memory",
+            args = "<what you want>|session|remember <text>|memory|ask on|off",
             help = "ask a language model to do it with the terminal's commands, ai session to talk to it",
             run = Session.Command,
             examples = new[]
@@ -61,9 +63,10 @@ public class AiMod : Mod
                 ("ai tell me when food is low", "it can write a cron script in ~"),
                 ("ai session", "a red screen where each line goes to it and it remembers the talk, exit leaves"),
                 ("ai remember Drill and Kovul are the miners", "it reads this before every answer"),
-                ("ai memory", "the memories as a list, d removes one, e edits them")
+                ("ai memory", "the memories as a list, d removes one, e edits them"),
+                ("ai ask off", "it runs changes without asking, ai ask on asks again")
             },
-            complete = done => done.Length == 0 ? new List<string> { "session", "remember", "memory" } : new List<string>()
+            complete = done => done.Length == 0 ? new List<string> { "session", "remember", "memory", "ask" } : done.Length == 1 && done[0] == "ask" ? new List<string> { "on", "off" } : new List<string>()
         });
     }
 

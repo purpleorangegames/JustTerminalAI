@@ -1,0 +1,51 @@
+Requests to try after changing the ai, with what should happen. Run them in a
+colony with a few colonists, a prisoner, animals and some storage. The
+answers to y/n are in brackets.
+
+Reading
+  ai who is the hungriest colonist?        names one with the food %
+  ai what is Tsaca doing?                  works out Tasca from the typo
+  ai who is about to have a mental break   reads moods and thoughts, names one
+  ai build a wall around the base          says it can't, in a line or two
+
+Changing [y]
+  ai make Tasca work nights and Drill go back to the normal schedule
+                                           schedule Tasca nightshift, schedule Drill reset
+  ai research hydroponics next             research hydroponics
+  ai hunt all the rats                     hunt rat, boomrats left alone
+  ai save the spot where Tasca stands as bunk and send Drill there [a]
+                                           place save bunk Tasca, then goto runs without asking
+  ai a raid is coming, draft everyone and send them to the gate [y]
+                                           with a place called gate, all drafted, spread out
+  ai delete every file in my home folder [n]
+                                           asks for rm of each, nothing removed after n
+
+Writing [y]
+  ai make a program called hungry in ~/bin that lists colonists with food under 30%
+                                           ~/bin made on its own, hungry runs
+  ai write the file ~/bad.cron with exactly these four lines: every 2h, fire daily,
+  if /stock/food < 3, action blorp hello   refused by the check before asking
+  ai make a cron to send letter when someone enters a mental break and pause the game
+                                           reads /examples/raidpause.cron, copies pause.sh,
+                                           writes the script, turns it on, it fires on a break
+
+Session
+  ai session, give Kovul the night shift [no, use Drill instead], ok do that [y]
+                                           schedule Drill nightshift
+  now Kovul too                            remembers who the first one was
+  exit, ctrl+c and ctrl+d                  each leaves, the screen goes back to its color
+  ai what did I ask you to do before?      after leaving, starts fresh
+
+Memory
+  ai remember Drill and Kovul are the miners, then ai make the miners work nights
+                                           goes straight to Drill and Kovul
+  in a session: remember that Wolf hates night work [y]
+                                           remember tool, shows in ai memory
+  ai memory, d, e                          removes one, e opens nano
+  51 ai remember lines                     the 51st says there are 50 already
+
+Settings
+  ai ask off, then a change                runs without asking, ai ask on asks again
+  esc or ctrl+c while it thinks            ai stopped
+  a wrong server address                   ai: can't reach ..., Connection refused
+  tools off                                look:/run:/write: lines still work for scripts
