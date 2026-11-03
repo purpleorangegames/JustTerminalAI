@@ -12,6 +12,7 @@
     <li>
       <packageId>tiagocc0.JustTerminal</packageId>
       <displayName>JustTerminal</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/3832919353</steamWorkshopUrl>
       <downloadUrl>https://github.com/purpleorangegames/JustTerminal</downloadUrl>
     </li>
   </modDependencies>
