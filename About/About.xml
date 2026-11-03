@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>JustTerminalAI</name>
+  <author>tiagocc0</author>
+  <packageId>tiagocc0.JustTerminalAI</packageId>
+  <modVersion>0.1.0</modVersion>
+  <url>https://github.com/purpleorangegames/JustTerminalAI</url>
+  <supportedVersions>
+    <li>1.7</li>
+  </supportedVersions>
+  <modDependencies>
+    <li>
+      <packageId>tiagocc0.JustTerminal</packageId>
+      <displayName>JustTerminal</displayName>
+      <downloadUrl>https://github.com/purpleorangegames/JustTerminal</downloadUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>tiagocc0.JustTerminal</li>
+  </loadAfter>
+  <description>Adds an ai command to JustTerminal. Write what you want in plain words and a language model running on your own computer does it with the terminal's commands.
+
+ai who's the hungriest?
+ai make the miners work nights and sleep in the day
+ai tell me when someone gets the plague
+
+It looks around with the read commands first, then shows the commands it wants to run and waits for y before it changes anything. It can also write cron scripts and programs in ~ for you. ai new forgets the talk so far.
+
+It needs a model server running, anything that answers like OpenAI: vLLM, llama.cpp server, LM Studio or Ollama. Set the address in the mod options, the default is http://127.0.0.1:8080/v1, and Test the server checks it. Nothing leaves your computer unless you point it somewhere else.
+
+Small models get things wrong more often, a 7B or bigger works better. Keep ask first on.</description>
+</ModMetaData>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <JTA_Url>Server address, anything that answers like OpenAI: vLLM, llama.cpp, LM Studio, Ollama</JTA_Url>
+  <JTA_Model>Model, empty takes the first one the server has</JTA_Model>
+  <JTA_Key>API key, empty for most local servers</JTA_Key>
+  <JTA_AskFirst>Ask before running commands that change the game</JTA_AskFirst>
+  <JTA_AskFirstTip>It shows the commands and waits for y. Off, they run right away.</JTA_AskFirstTip>
+  <JTA_Tools>Use tool calls</JTA_Tools>
+  <JTA_ToolsTip>Most servers have them. Off, the model answers in look: and run: lines instead.</JTA_ToolsTip>
+  <JTA_Think>Let the model think first</JTA_Think>
+  <JTA_ThinkTip>Slower, and some models think until they run out of tokens. Off asks the model to answer right away, models that don't know the option ignore it.</JTA_ThinkTip>
+  <JTA_Steps>Most steps for one ai line</JTA_Steps>
+  <JTA_Timeout>Seconds to wait for an answer</JTA_Timeout>
+  <JTA_Test>Test the server</JTA_Test>
+  <JTA_Testing>asking...</JTA_Testing>
+  <JTA_TestGood>works, models: {0}</JTA_TestGood>
+  <JTA_TestBad>failed: {0}</JTA_TestBad>
+</LanguageData>

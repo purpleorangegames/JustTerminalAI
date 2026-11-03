@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>JustTerminalAI</AssemblyName>
+    <RootNamespace>JustTerminalAI</RootNamespace>
+    <Version>0.1.0</Version>
+    <Authors>tiagocc0</Authors>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <OutputPath>../1.7/Assemblies/</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- reference only, the game and JustTerminal provide the real dlls -->
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.4985-unstable" ExcludeAssets="runtime" PrivateAssets="all" />
+    <Reference Include="JustTerminal">
+      <HintPath>../../JustTerminal/1.7/Assemblies/JustTerminal.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
