@@ -31,7 +31,7 @@ Each ai line starts fresh. ai session turns the screen red and gives you an ai&g
 
 ai remember Drill and Kovul are the miners keeps a line it reads before every answer, in a session you can also just tell it to remember something. ai memory lists them, d removes one, e edits them. They're in ~/ai.memory, so they belong to the save.
 
-It needs a model server running, anything that answers like OpenAI: vLLM, llama.cpp server, LM Studio or Ollama. Set the address in the mod options, the default is http://127.0.0.1:8080/v1, and Test the server checks it. Nothing leaves your computer unless you point it somewhere else.
+It needs a model server running, anything that answers like OpenAI: vLLM, llama.cpp server, LM Studio or Ollama. Set the address in the mod options, the default is http://127.0.0.1:8080/v1, and Test the server checks it. Nothing leaves your computer unless you point it somewhere else. The model can only use the terminal's own commands, inside the game: it reads, and changes things or writes files in the save's ~ after your y. It can't run anything on your computer or touch your real files.
 
 Small models get things wrong more often, a 7B or bigger works better. Keep ask first on.</description>
 </ModMetaData>
