@@ -16,8 +16,8 @@ namespace JustTerminalAI;
 // one ai line: the model reads with read commands, asks to run edit commands, says what it found
 public class Session
 {
-    // the talk so far, kept until ai new or the game closes, so "now Drill too" works
-    private static readonly List<JsonObject> talk = new List<JsonObject>();
+    // the talk so far: one ai line has its own, a session keeps it until it's left
+    private readonly List<JsonObject> talk = new List<JsonObject>();
     // where read commands run, nobody sees it
     private static Shell looker;
     private const int MaxTalk = 60;
@@ -30,25 +30,30 @@ public class Session
 
     private readonly Shell sh;
     private int steps;
+    // a session ends when another game is loaded
+    private Game game;
 
     private Session(Shell sh)
     {
         this.sh = sh;
+        game = Current.Game;
     }
+
+    private static readonly string[] header =
+    {
+        " ███   ███ ",
+        "█   █   █  ",
+        "█████   █  ",
+        "█   █   █  ",
+        "█   █  ███ "
+    };
 
     public static void Command(Shell sh, string[] args)
     {
         string what = string.Join(" ", args).Trim();
         if (what.Length == 0)
         {
-            sh.Print("usage: ai <what you want>, ai new forgets the talk", Ink.Dim);
-            return;
-        }
-        if (what.Equals("new", StringComparison.OrdinalIgnoreCase))
-        {
-            talk.Clear();
-            looker = null;
-            sh.Print("ai forgot the talk", Ink.Dim);
+            sh.Print("usage: ai <what you want>, or ai session to talk to it", Ink.Dim);
             return;
         }
         if (Current.ProgramState != ProgramState.Playing)
@@ -56,13 +61,51 @@ public class Session
             sh.Print("ai needs a game running", Ink.Bad);
             return;
         }
+        if (what.Equals("session", StringComparison.OrdinalIgnoreCase))
+        {
+            Session session = new Session(sh);
+            sh.Clear();
+            sh.Print();
+            foreach (string line in header)
+            {
+                sh.Print(" " + line, Ink.Bad);
+            }
+            sh.Print();
+            sh.Print("talk to it, it remembers until you leave. exit or ctrl+c leaves", Ink.Dim);
+            sh.Mode = new ShellMode
+            {
+                prompt = "ai> ",
+                red = true,
+                line = session.Line,
+                leave = () => sh.Print("left the ai session", Ink.Dim)
+            };
+            return;
+        }
+        // one line, a talk of its own
+        new Session(sh).Ask(what);
+    }
+
+    private void Line(string text)
+    {
+        if (Current.Game != game)
+        {
+            sh.Print("another game was loaded, the session ended", Ink.Warn);
+            sh.LeaveMode();
+            return;
+        }
+        Ask(text);
+    }
+
+    private void Ask(string what)
+    {
+        steps = 0;
         Add(Message("user", what));
-        new Session(sh).Send();
+        Send();
     }
 
     private static JsonObject Message(string role, string content) => new JsonObject { ["role"] = role, ["content"] = content };
 
-    private static void Add(JsonObject m)
+    private void Add(JsonObject m)
     {
         talk.Add(m);
         if (talk.Count > MaxTalk)
@@ -442,7 +485,7 @@ public class Session
 
         public override bool HandleKey(Event e)
         {
-            if (e.keyCode == KeyCode.Escape)
+            if (e.keyCode == KeyCode.Escape || e.control && e.keyCode == KeyCode.C)
             {
                 stop.Cancel();
                 Done = true;

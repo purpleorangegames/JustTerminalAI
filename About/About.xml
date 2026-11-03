@@ -24,7 +24,9 @@ ai who's the hungriest?
 ai make the miners work nights and sleep in the day
 ai tell me when someone gets the plague
 
-It looks around with the read commands first, then shows the commands it wants to run and waits for y before it changes anything. It can also write cron scripts and programs in ~ for you. ai new forgets the talk so far.
+It looks around with the read commands first, then shows the commands it wants to run and waits for y before it changes anything. It can also write cron scripts and programs in ~ for you.
+
+Each ai line starts fresh. ai session turns the screen red and gives you an ai&gt; prompt, then you just talk to it and it remembers the talk. exit or ctrl+c leaves.
 
 It needs a model server running, anything that answers like OpenAI: vLLM, llama.cpp server, LM Studio or Ollama. Set the address in the mod options, the default is http://127.0.0.1:8080/v1, and Test the server checks it. Nothing leaves your computer unless you point it somewhere else.
 
