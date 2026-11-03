@@ -10,6 +10,8 @@ It reads with the terminal's read commands, help and the manual's parts, then sh
 
 Each `ai` line starts fresh. `ai session` turns the screen red with an `ai>` prompt, every line goes to the model and it remembers the talk until you leave with `exit` or ctrl+c.
 
+`ai remember <text>` keeps a line it reads before every answer, and in a session you can just tell it to remember something. `ai memory` lists them like cron_edit: d removes one, e edits the file. They live in `~/ai.memory`, so they belong to the save and go along with export and import.
+
 It needs a server that answers like OpenAI's chat completions: vLLM, llama.cpp server, LM Studio or Ollama. The address is in the mod options, the default is http://127.0.0.1:8080/v1. It uses tool calls, and for servers without them there's an option to answer in plain lines instead. Thinking is off by default, it's slower and some models think until they run out of tokens.
 
 Build with `dotnet build -c Release` in Source, it needs JustTerminal next to it in the same folder.

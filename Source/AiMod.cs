@@ -51,7 +51,7 @@ public class AiMod : Mod
         Commands.All.Add(new Command
         {
             name = "ai",
-            args = "<what you want>|session",
+            args = "<what you want>|session|remember <text>|memory",
             help = "ask a language model to do it with the terminal's commands, ai session to talk to it",
             run = Session.Command,
             examples = new[]
@@ -59,9 +59,11 @@ public class AiMod : Mod
                 ("ai who's the hungriest?", "it reads with the read commands and answers"),
                 ("ai make the miners work nights", "it shows the edit commands it wants, y runs them"),
                 ("ai tell me when food is low", "it can write a cron script in ~"),
-                ("ai session", "a red screen where each line goes to it and it remembers the talk, exit leaves")
+                ("ai session", "a red screen where each line goes to it and it remembers the talk, exit leaves"),
+                ("ai remember Drill and Kovul are the miners", "it reads this before every answer"),
+                ("ai memory", "the memories as a list, d removes one, e edits them")
             },
-            complete = done => done.Length == 0 ? new List<string> { "session" } : new List<string>()
+            complete = done => done.Length == 0 ? new List<string> { "session", "remember", "memory" } : new List<string>()
         });
     }
 

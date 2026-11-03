@@ -61,6 +61,17 @@ public class Session
             sh.Print("ai needs a game running", Ink.Bad);
             return;
         }
+        string first = args[0].ToLowerInvariant();
+        if (first == "remember")
+        {
+            Memory.Remember(sh, string.Join(" ", args.Skip(1)));
+            return;
+        }
+        if (first == "memory" && args.Length == 1)
+        {
+            sh.App = new MemoryApp();
+            return;
+        }
         if (what.Equals("session", StringComparison.OrdinalIgnoreCase))
         {
             Session session = new Session(sh);
@@ -177,7 +188,8 @@ public class Session
                 "read" => new Item { kind = "read", text = Arg(args, "command") },
                 "change" => new Item { kind = "change", text = Arg(args, "command") },
                 "write_file" => new Item { kind = "write", text = Arg(args, "path"), body = Arg(args, "text") },
-                _ => new Item { kind = "bad", text = name, result = "there's no tool called " + name + ", the tools are read, change and write_file" }
+                "remember" => new Item { kind = "remember", text = Arg(args, "text") },
+                _ => new Item { kind = "bad", text = name, result = "there's no tool called " + name + ", the tools are read, change, write_file and remember" }
             };
             item.id = id;
             if (item.kind != "bad" && args == null)
@@ -225,11 +237,11 @@ public class Session
                 }
                 items.Add(new Item { kind = "write", text = rest, body = body.ToString().TrimEnd('\n') });
             }
-            else if (kind is "look" or "run")
+            else if (kind is "look" or "run" or "remember")
             {
                 if (rest.Length > 0)
                 {
-                    items.Add(new Item { kind = kind == "look" ? "read" : "change", text = rest });
+                    items.Add(new Item { kind = kind == "look" ? "read" : kind == "run" ? "change" : "remember", text = rest });
                 }
             }
             // a lone end is left over from a write block
@@ -282,7 +294,7 @@ public class Session
         {
             change.result = Blocked(change.text);
         }
-        List<Item> waiting = items.Where(x => x.kind is "change" or "write" && x.result == null).ToList();
+        List<Item> waiting = items.Where(x => x.kind is "change" or "write" or "remember" && x.result == null).ToList();
         if (waiting.Count == 0)
         {
             Reply(items);
@@ -296,7 +308,7 @@ public class Session
         sh.Print("ai wants to:", Ink.Warn);
         foreach (Item c in waiting)
         {
-            sh.Print("  " + (c.kind == "write" ? $"write {c.text} ({c.body.Split('\n').Length} lines)" : c.text), Ink.Bright);
+            sh.Print("  " + (c.kind == "write" ? $"write {c.text} ({c.body.Split('\n').Length} lines)" : c.kind == "remember" ? "remember: " + c.text : c.text), Ink.Bright);
         }
         sh.AskLine("run them? y/n", answer =>
         {
@@ -321,7 +333,7 @@ public class Session
     {
         foreach (Item c in waiting)
         {
-            c.result = c.kind == "write" ? Write(c.text, c.body) : Run(c.text);
+            c.result = c.kind == "write" ? Write(c.text, c.body) : c.kind == "remember" ? Remember(c.text) : Run(c.text);
         }
         Reply(items);
     }
@@ -341,7 +353,7 @@ public class Session
             StringBuilder b = new StringBuilder();
             foreach (Item i in items)
             {
-                b.Append(i.kind == "read" ? "look: " : i.kind == "write" ? "write: " : "run: ").Append(i.text).Append('\n').Append(i.result).Append("\n\n");
+                b.Append(i.kind == "read" ? "look: " : i.kind == "write" ? "write: " : i.kind == "remember" ? "remember: " : "run: ").Append(i.text).Append('\n').Append(i.result).Append("\n\n");
             }
             Add(Message("user", b.ToString().TrimEnd()));
         }
@@ -460,6 +472,19 @@ public class Session
         string bad = Files.WriteText(path, text, false);
         sh.Print(bad ?? path, bad == null ? Ink.Good : Ink.Bad);
         return bad ?? "written" + (path.EndsWith(".cron", StringComparison.OrdinalIgnoreCase) ? ", it's off until cron <name> on" : "");
+    }
+
+    private string Remember(string text)
+    {
+        sh.Out("ai", Ink.Accent);
+        sh.Out("# ", Ink.Dim);
+        sh.Print("remember " + text, Ink.Bright);
+        string bad = Memory.Add(text);
+        if (bad != null)
+        {
+            sh.Print(bad, Ink.Bad);
+        }
+        return bad ?? "remembered";
     }
 
     private static string Cut(string text) => text.Length > MaxOutput ? text.Substring(0, MaxOutput) + "\n...(cut)" : text;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using JustTerminal;
@@ -19,7 +20,8 @@ How to work:
 - Anything that changes the game, files or settings is a change, like schedule, draft, rm, mkdir or cron on.
 - Do several reads or several changes at once when you can.
 - Don't explain what you're going to do, do it. When it's done, answer in one or two short lines of plain words.
-- If the commands can't do it, say so in one line.";
+- If the commands can't do it, say so in one line.
+- When the player asks you to remember something, keep it with remember, short.";
 
     private const string Lines =
 @"
@@ -29,6 +31,7 @@ look: <command>   reads, you get back what it printed
 run: <command>    a change, the player may be asked first
 say: <text>       tells the player something
 write: <path>     writes a file in ~, the lines after it are the whole file, then a line with only end
+remember: <text>  keeps a line for every later answer, only when the player asks you to remember something
 
 For example:
 look: manual cron scripts
@@ -63,6 +66,15 @@ say: Tasca works nights now, and you get a letter when food is low.
         }
         b.Append("\nThe manual's parts, for manual <part>:\n");
         b.Append(string.Join(", ", Programs.Sections().Select(s => s.title))).Append('\n');
+        List<string> memories = Memory.Lines();
+        if (memories.Count > 0)
+        {
+            b.Append("\nWhat the player told you to remember:\n");
+            foreach (string m in memories)
+            {
+                b.Append("- ").Append(m).Append('\n');
+            }
+        }
         b.Append("\nNow:\n");
         b.Append("Colony: ").Append(Faction.OfPlayer?.Name).Append('\n');
         if (Find.CurrentMap != null)
