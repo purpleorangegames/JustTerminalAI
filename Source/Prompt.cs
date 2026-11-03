@@ -24,11 +24,25 @@ How to work:
     private const string Lines =
 @"
 
-Answer only with lines that start with one of these:
-look: <command>   runs a command that only reads, you get back what it printed
-run: <command>    runs a command that changes things, the player may be asked first
+You have no tools, you answer with lines that start with one of these instead:
+look: <command>   reads, you get back what it printed
+run: <command>    a change, the player may be asked first
 say: <text>       tells the player something
-write: <path>     writes a file in ~, the lines after it are the file, up to a line with only end";
+write: <path>     writes a file in ~, the lines after it are the whole file, then a line with only end
+
+For example:
+look: manual cron scripts
+run: schedule Tasca nightshift
+write: ~/lowfood.cron
+every 2h
+fire daily
+if /stock/food < 3
+action letter only {value} days of food left
+end
+run: cron lowfood on
+say: Tasca works nights now, and you get a letter when food is low.
+
+";
 
     public static string Build()
     {

@@ -50,7 +50,7 @@ public static class Client
             ("command", "the command line, like pawns or cat /pawns/Tasca/mood")),
         Tool("change", "Runs a command that changes the game or the files, as in edit mode. The player is asked first, for all the changes in one answer together.",
             ("command", "the command line, like schedule Tasca nightshift")),
-        Tool("write_file", "Writes a file in ~, like a .cron script or a .sh program. Scripts and programs are checked first and a bad one comes back with the reason. The player is asked first.",
+        Tool("write_file", "Writes a file in ~, like a .cron script or a .sh program, folders on the way are made. Scripts and programs are checked first and a bad one comes back with the reason. The player is asked first.",
             ("path", "where, like ~/lowfood.cron or ~/bin/hungry.sh"), ("text", "the whole file"))
     };
 

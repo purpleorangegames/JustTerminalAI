@@ -163,6 +163,12 @@ public class Session
             int colon = line.IndexOf(':');
             string kind = colon > 0 ? line.Substring(0, colon).Trim().ToLowerInvariant() : "";
             string rest = colon > 0 ? line.Substring(colon + 1).Trim().Trim('`').Trim() : line;
+            // some models put the write after run:
+            if (kind == "run" && rest.StartsWith("write ", StringComparison.OrdinalIgnoreCase))
+            {
+                kind = "write";
+                rest = rest.Substring(6).Trim();
+            }
             if (kind == "write")
             {
                 // the file is the lines after it, until end
@@ -183,7 +189,8 @@ public class Session
                     items.Add(new Item { kind = kind == "look" ? "read" : "change", text = rest });
                 }
             }
-            else
+            // a lone end is left over from a write block
+            else if (line != "end")
             {
                 said.Add(kind == "say" ? rest : line);
             }
@@ -326,6 +333,11 @@ public class Session
         {
             return words[0] + " changes things, use change for it";
         }
+        // the player's history, not the hidden shell's
+        if (words[0].Equals("history", StringComparison.OrdinalIgnoreCase))
+        {
+            return sh.History.Count == 0 ? "(nothing typed yet)" : string.Join("\n", sh.History);
+        }
         if (looker == null)
         {
             looker = new Shell { CanAsk = false };
@@ -391,6 +403,17 @@ public class Session
         sh.Out("ai", Ink.Accent);
         sh.Out("# ", Ink.Dim);
         sh.Print("write " + path, Ink.Bright);
+        // folders on the way are made too, like ~/bin for the first program
+        string[] parts = path.Split('/');
+        for (int i = 1; i < parts.Length - 1; i++)
+        {
+            string dir = string.Join("/", parts, 0, i + 1);
+            if (Files.Find(null, dir) == null)
+            {
+                Shell quiet = new Shell { CanAsk = false };
+                quiet.Execute("mkdir " + dir);
+            }
+        }
         string bad = Files.WriteText(path, text, false);
         sh.Print(bad ?? path, bad == null ? Ink.Good : Ink.Bad);
         return bad ?? "written" + (path.EndsWith(".cron", StringComparison.OrdinalIgnoreCase) ? ", it's off until cron <name> on" : "");
