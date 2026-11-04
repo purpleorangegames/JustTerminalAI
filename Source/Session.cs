@@ -329,7 +329,8 @@ public class Session
                 sh.Out("# ", Ink.Dim);
                 sh.Print("write " + write.text + ": " + write.result, Ink.Dim);
             }
-            string key = "change write " + write.text.Trim();
+            // a write counts as the same only with the same text, rewriting a file to fix it is fine
+            string key = "change write " + write.text.Trim() + "\n" + write.body;
             readTimes[key] = readTimes.TryGetValue(key, out int times) ? times + 1 : 1;
             if (readTimes[key] >= 3)
             {
