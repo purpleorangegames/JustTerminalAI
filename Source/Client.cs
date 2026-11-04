@@ -42,6 +42,7 @@ public static class Client
     }
 
     private static string model;
+    private static int sent;
 
     // what the model can call, the terminal does the rest
     private static JsonArray Tools() => new JsonArray
@@ -109,12 +110,28 @@ public static class Client
         }
         using CancellationTokenSource time = CancellationTokenSource.CreateLinkedTokenSource(stop);
         time.CancelAfter(TimeSpan.FromSeconds(AiMod.Settings.timeout));
-        HttpRequestMessage r = Request(HttpMethod.Post, "/chat/completions");
-        r.Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json");
-        using HttpResponseMessage res = await http.SendAsync(r, time.Token);
-        string text = await res.Content.ReadAsStringAsync(time.Token);
-        if (!res.IsSuccessStatusCode)
+        string text = null;
+        for (int attempt = 0; ; attempt++)
         {
+            HttpRequestMessage r = Request(HttpMethod.Post, "/chat/completions");
+            r.Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json");
+            // for testing: JTA_DEBUG_DIR=<folder> keeps every request sent, numbered
+            if (Environment.GetEnvironmentVariable("JTA_DEBUG_DIR") is string debug && debug.Length > 0)
+            {
+                System.IO.Directory.CreateDirectory(debug);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(debug, $"request-{Interlocked.Increment(ref sent):000}.json"), body.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+            }
+            using HttpResponseMessage res = await http.SendAsync(r, time.Token);
+            text = await res.Content.ReadAsStringAsync(time.Token);
+            if (res.IsSuccessStatusCode)
+            {
+                break;
+            }
+            // llama-server gives up when the model writes a tool call that isn't json, the next try usually is
+            if (attempt == 0 && text.Contains("tool call", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
             throw new Exception((int)res.StatusCode + " " + Short(text));
         }
         JsonNode choice = JsonNode.Parse(text)?["choices"]?[0];

@@ -322,6 +322,19 @@ public class Session
         foreach (Item write in items.Where(x => x.kind == "write"))
         {
             write.result = CheckWrite(write.text, write.body);
+            if (write.result != null)
+            {
+                // a refused write shows in one line, the model gets the reason
+                sh.Out("ai", Ink.Accent);
+                sh.Out("# ", Ink.Dim);
+                sh.Print("write " + write.text + ": " + write.result, Ink.Dim);
+            }
+            string key = "change write " + write.text.Trim();
+            readTimes[key] = readTimes.TryGetValue(key, out int times) ? times + 1 : 1;
+            if (readTimes[key] >= 3)
+            {
+                stuck = true;
+            }
         }
         // commands that don't exist go back to the model, the player isn't asked about them
         foreach (Item change in items.Where(x => x.kind == "change"))
