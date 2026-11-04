@@ -30,6 +30,11 @@ public class Session
 
     private readonly Shell sh;
     private int steps;
+    // what each read gave in this request, small models sometimes ask for the same one over and over
+    private readonly Dictionary<string, string> reads = new Dictionary<string, string>();
+    private readonly Dictionary<string, int> readTimes = new Dictionary<string, int>();
+    // set when a read was asked for a third time, the request stops there
+    private bool stuck;
     // a at the question: yes to everything for the rest of this line or session
     private bool yesToAll;
     // a session ends when another game is loaded
@@ -123,6 +128,9 @@ public class Session
     private void Ask(string what)
     {
         steps = 0;
+        reads.Clear();
+        readTimes.Clear();
+        stuck = false;
         Add(Message("user", what));
         Send();
     }
@@ -275,8 +283,8 @@ public class Session
         List<string> said = new List<string>();
         if (reply["tool_calls"] is JsonArray calls)
         {
+            // what it says while it still works is its own narration, only the answer at the end is shown
             items = FromCalls(calls);
-            said.AddRange(content.Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0));
         }
         else
         {
@@ -286,7 +294,8 @@ public class Session
                 said.AddRange(content.Split('\n').Select(l => l.TrimEnd()).Where(l => l.Length > 0));
             }
         }
-        foreach (string line in said)
+        // small models repeat themselves, each line shows once
+        foreach (string line in said.Distinct())
         {
             sh.Print(line);
         }
@@ -298,14 +307,42 @@ public class Session
         {
             read.result = Read(read.text);
         }
+        if (stuck)
+        {
+            // the calls still get their answers so the talk can go on in a session
+            sh.Print("ai stopped, the model kept reading the same thing. Ask again in other words, or try a bigger model", Ink.Warn);
+            foreach (Item i in items.Where(x => x.result == null))
+            {
+                i.result = "Stopped, you read the same thing three times.";
+            }
+            Reply(items, false);
+            return;
+        }
         // scripts and programs are checked before the player is asked
         foreach (Item write in items.Where(x => x.kind == "write"))
         {
             write.result = CheckWrite(write.text, write.body);
         }
+        // commands that don't exist go back to the model, the player isn't asked about them
         foreach (Item change in items.Where(x => x.kind == "change"))
         {
-            change.result = Blocked(change.text);
+            change.result = Blocked(change.text) ?? Unknown(change.text);
+            string key = "change " + change.text.Trim();
+            readTimes[key] = readTimes.TryGetValue(key, out int times) ? times + 1 : 1;
+            if (readTimes[key] >= 3)
+            {
+                stuck = true;
+            }
+        }
+        if (stuck)
+        {
+            sh.Print("ai stopped, the model kept asking for the same thing. Ask again in other words, or try a bigger model", Ink.Warn);
+            foreach (Item i in items.Where(x => x.result == null))
+            {
+                i.result = "Stopped, you asked for the same thing three times.";
+            }
+            Reply(items, false);
+            return;
         }
         List<Item> waiting = items.Where(x => x.kind is "change" or "write" or "remember" && x.result == null).ToList();
         if (waiting.Count == 0)
@@ -348,6 +385,12 @@ public class Session
 
     private void Do(List<Item> items, List<Item> waiting)
     {
+        // after a change the same read can give something new
+        reads.Clear();
+        foreach (string k in readTimes.Keys.Where(k => !k.StartsWith("change ")).ToList())
+        {
+            readTimes.Remove(k);
+        }
         foreach (Item c in waiting)
         {
             c.result = c.kind == "write" ? Write(c.text, c.body) : c.kind == "remember" ? Remember(c.text) : Run(c.text);
@@ -396,11 +439,25 @@ public class Session
         sh.Out("ai", Ink.Accent);
         sh.Out("$ ", Ink.Dim);
         sh.Print(line, Ink.Dim);
-        if (Blocked(line) is string bad)
+        if ((Blocked(line) ?? Unknown(line)) is string bad)
         {
             return bad;
         }
+        string key = line.Trim();
+        readTimes[key] = readTimes.TryGetValue(key, out int times) ? times + 1 : 1;
+        if (readTimes[key] >= 3)
+        {
+            stuck = true;
+        }
+        if (reads.TryGetValue(key, out string again))
+        {
+            return "You read this already in this request, it hasn't changed:\n" + again + "\nDon't read it again, answer the player with it or do something else.";
+        }
         string[] words = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (EditCommands.Find(words[0]) != null && Commands.Find(words[0]) == null)
+        {
+            return words[0] + " is an edit command, send it with change, you don't need to type edit";
+        }
         if (changing.Contains(words[0]) || words[0].Equals("cron", StringComparison.OrdinalIgnoreCase) && words.Length > 2 && words[2] != "test" || words[0].Equals("place", StringComparison.OrdinalIgnoreCase) && words.Length > 1)
         {
             return words[0] + " changes things, use change for it";
@@ -421,7 +478,24 @@ public class Session
         looker.Execute(line);
         looker.App = null;
         string said = string.Join("\n", looker.TextSince(mark));
-        return Cut(said.Length == 0 ? "(nothing printed)" : said);
+        said = Cut(said.Length == 0 ? "(nothing printed)" : said);
+        if (said.Contains("set only changes things in edit mode"))
+        {
+            said = "That changes things, send the same command with change, you don't need to type edit.";
+        }
+        reads[key] = said;
+        return said;
+    }
+
+    // null when the first word is a command, an alias or a program the terminal knows
+    private string Unknown(string line)
+    {
+        string first = line.Trim().Split(' ')[0];
+        if (first.Length == 0 || JustTerminalMod.Settings.aliases.ContainsKey(first) || Commands.Find(first) != null || EditCommands.Find(first) != null || Programs.FindFile(sh, first) != null)
+        {
+            return null;
+        }
+        return first + " isn't a command, the commands are in the list you were given, help <command> shows one";
     }
 
     // an edit command in the player's shell, like typed in edit mode

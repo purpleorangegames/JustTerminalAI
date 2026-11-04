@@ -17,7 +17,7 @@ public static class Prompt
 How to work:
 - Read first when you aren't sure of names, numbers or what's there. Names with spaces use _ in commands.
 - help <command> shows a command's examples. manual <part> shows that part of the manual, read it before writing a cron script or a program.
-- Anything that changes the game, files or settings is a change, like schedule, draft, rm, mkdir or cron on.
+- Anything that changes the game, files or settings is a change, like schedule, draft, research <project>, hunt, rm, mkdir or cron on. Changes already run as in edit mode, never type edit.
 - Do several reads or several changes at once when you can, like all the manual parts you need in one go.
 - Positions are x,z on the map, x goes right and z goes up. Saved places are in /places, place save keeps one and goto sends colonists there, goto all gate or goto @group gate sends many in one line. pick waits for the player to click the map, only the player can use it, tell them to when you need a spot.
 - /examples has working cron scripts and programs that come with the mod, ls /examples lists them and cat shows one. /bin has the programs the commands are made of. Look at a close example before writing your own.

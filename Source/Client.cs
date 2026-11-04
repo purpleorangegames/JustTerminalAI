@@ -121,6 +121,12 @@ public static class Client
         string content = (string)choice?["message"]?["content"] ?? "";
         // some servers leave the thinking in the answer
         content = Regex.Replace(content, "<think>.*?</think>", "", RegexOptions.Singleline).Trim();
+        // some models start thinking without the opening tag and only close it
+        int closed = content.LastIndexOf("</think>", StringComparison.Ordinal);
+        if (closed >= 0)
+        {
+            content = content.Substring(closed + "</think>".Length).Trim();
+        }
         JsonArray calls = choice?["message"]?["tool_calls"] as JsonArray;
         if (content.Length == 0 && (calls == null || calls.Count == 0))
         {
