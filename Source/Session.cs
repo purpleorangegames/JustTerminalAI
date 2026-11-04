@@ -37,6 +37,8 @@ public class Session
     private bool stuck;
     // a at the question: yes to everything for the rest of this line or session
     private bool yesToAll;
+    // changes the player said no to, for the rest of this line or session
+    private readonly HashSet<string> refused = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     // a session ends when another game is loaded
     private Game game;
 
@@ -340,7 +342,7 @@ public class Session
         // commands that don't exist go back to the model, the player isn't asked about them
         foreach (Item change in items.Where(x => x.kind == "change"))
         {
-            change.result = Blocked(change.text) ?? Unknown(change.text);
+            change.result = Blocked(change.text) ?? Unknown(change.text) ?? Twice(change.text) ?? Refused(change.text);
             string key = "change " + change.text.Trim();
             readTimes[key] = readTimes.TryGetValue(key, out int times) ? times + 1 : 1;
             if (readTimes[key] >= 3)
@@ -376,7 +378,8 @@ public class Session
         }
         sh.AskLine("run them? y/n, a for yes to all", answer =>
         {
-            answer = answer.Trim().ToLowerInvariant();
+            string said = answer.Trim();
+            answer = said.ToLowerInvariant();
             if (answer is "a" or "all")
             {
                 yesToAll = true;
@@ -387,10 +390,16 @@ public class Session
                 return;
             }
             sh.Print("left as it was", Ink.Dim);
-            string no = "The player said no, nothing was done." + (answer.Length > 1 && answer != "no" ? " They said: " + answer : "");
+            // the player's own words, and what was refused so it isn't asked for again
+            string words = said.Length > 1 && answer is not ("no" or "n") ? " They said: " + said : "";
             foreach (Item c in waiting)
             {
-                c.result = no;
+                string what = c.kind == "write" ? "writing " + c.text : c.text;
+                c.result = $"The player said no to {what}, nothing was done. Don't do it again unless they ask for it." + words;
+                if (c.kind == "change")
+                {
+                    refused.Add(c.text.Trim());
+                }
             }
             // every call gets its answer, the talk goes on at the next ai line
             Reply(items, false);
@@ -500,6 +509,21 @@ public class Session
         reads[key] = said;
         return said;
     }
+
+    // a line with the same command twice, like "schedule Tasca nightshift schedule Drill reset", runs as
+    // one command with extra words, so it goes back to the model
+    private static string Twice(string line)
+    {
+        string[] words = line.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length > 2 && words.Skip(1).Any(w => string.Equals(w, words[0], StringComparison.OrdinalIgnoreCase)))
+        {
+            return "one command per change, send each " + words[0] + " as its own change";
+        }
+        return null;
+    }
+
+    private string Refused(string line) =>
+        refused.Contains(line.Trim()) ? "The player already said no to " + line.Trim() + ", don't ask for it again. Do what they asked instead, or answer them." : null;
 
     // null when the first word is a command, an alias or a program the terminal knows
     private string Unknown(string line)
