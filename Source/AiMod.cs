@@ -23,6 +23,22 @@ public class AiSettings : ModSettings
     public bool tools = true;
     // the model thinks before answering, slower and sometimes it never stops
     public bool think = false;
+    // sampling, only a low temperature by default; below 0 leaves it to the server
+    public float temperature = 0.3f;
+    public float topP = -1f;
+    public int topK = -1;
+    public float minP = -1f;
+    public float presencePenalty = -1f;
+
+    // Qwen's numbers for each mode, small Qwen models repeat themselves without the presence penalty
+    public void QwenSampling(bool thinking)
+    {
+        temperature = thinking ? 1.0f : 0.7f;
+        topP = thinking ? 0.95f : 0.8f;
+        topK = 20;
+        minP = 0f;
+        presencePenalty = 1.5f;
+    }
 
     public override void ExposeData()
     {
@@ -34,6 +50,11 @@ public class AiSettings : ModSettings
         Scribe_Values.Look(ref timeout, "timeout", 180);
         Scribe_Values.Look(ref tools, "tools", true);
         Scribe_Values.Look(ref think, "think", false);
+        Scribe_Values.Look(ref temperature, "temperature", 0.3f);
+        Scribe_Values.Look(ref topP, "topP", -1f);
+        Scribe_Values.Look(ref topK, "topK", -1);
+        Scribe_Values.Look(ref minP, "minP", -1f);
+        Scribe_Values.Look(ref presencePenalty, "presencePenalty", -1f);
     }
 }
 
@@ -44,6 +65,11 @@ public class AiMod : Mod
 
     private string stepsBuffer;
     private string timeoutBuffer;
+    private string temperatureBuffer;
+    private string topPBuffer;
+    private string topKBuffer;
+    private string minPBuffer;
+    private string presenceBuffer;
     private System.Threading.Tasks.Task<List<string>> test;
 
     public AiMod(ModContentPack content) : base(content)
@@ -88,6 +114,18 @@ public class AiMod : Mod
         l.CheckboxLabeled("JTA_Think".Translate(), ref Settings.think, "JTA_ThinkTip".Translate());
         l.TextFieldNumericLabeled("JTA_Steps".Translate(), ref Settings.maxSteps, ref stepsBuffer, 1, 50);
         l.TextFieldNumericLabeled("JTA_Timeout".Translate(), ref Settings.timeout, ref timeoutBuffer, 10, 1800);
+        l.Gap();
+        l.Label("JTA_Sampling".Translate(), tooltip: "JTA_SamplingTip".Translate());
+        l.TextFieldNumericLabeled("JTA_Temperature".Translate(), ref Settings.temperature, ref temperatureBuffer, -1f, 2f);
+        l.TextFieldNumericLabeled("JTA_TopP".Translate(), ref Settings.topP, ref topPBuffer, -1f, 1f);
+        l.TextFieldNumericLabeled("JTA_TopK".Translate(), ref Settings.topK, ref topKBuffer, -1, 200);
+        l.TextFieldNumericLabeled("JTA_MinP".Translate(), ref Settings.minP, ref minPBuffer, -1f, 1f);
+        l.TextFieldNumericLabeled("JTA_Presence".Translate(), ref Settings.presencePenalty, ref presenceBuffer, -1f, 2f);
+        if (l.ButtonText("JTA_QwenSampling".Translate()))
+        {
+            Settings.QwenSampling(Settings.think);
+            temperatureBuffer = topPBuffer = topKBuffer = minPBuffer = presenceBuffer = null;
+        }
         l.Gap();
         if (l.ButtonText("JTA_Test".Translate()))
         {

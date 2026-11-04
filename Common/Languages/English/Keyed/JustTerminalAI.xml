@@ -11,6 +11,14 @@
   <JTA_ThinkTip>Slower, and some models think until they run out of tokens. Off asks the model to answer right away, models that don't know the option ignore it.</JTA_ThinkTip>
   <JTA_Steps>Most steps for one ai line</JTA_Steps>
   <JTA_Timeout>Seconds to wait for an answer</JTA_Timeout>
+  <JTA_Sampling>Sampling, how the model picks its words</JTA_Sampling>
+  <JTA_SamplingTip>By default only the temperature is sent, low so the model sticks to what works. Below 0 leaves one to the server's default. If a small Qwen model keeps asking for the same thing, try Qwen's settings below, they made plain Qwen3.5-4B better but the Opus distill worse.</JTA_SamplingTip>
+  <JTA_Temperature>Temperature</JTA_Temperature>
+  <JTA_TopP>Top p</JTA_TopP>
+  <JTA_TopK>Top k</JTA_TopK>
+  <JTA_MinP>Min p</JTA_MinP>
+  <JTA_Presence>Presence penalty</JTA_Presence>
+  <JTA_QwenSampling>Qwen's settings for the thinking option as it is now</JTA_QwenSampling>
   <JTA_Test>Test the server</JTA_Test>
   <JTA_Testing>asking...</JTA_Testing>
   <JTA_TestGood>works, models: {0}</JTA_TestGood>

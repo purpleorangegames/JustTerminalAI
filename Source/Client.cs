@@ -96,9 +96,30 @@ public static class Client
         {
             ["model"] = use,
             ["messages"] = list,
-            ["temperature"] = 0.3,
             ["max_tokens"] = 8192
         };
+        // each one below 0 is left to the server's own default
+        AiSettings set = AiMod.Settings;
+        if (set.temperature >= 0f)
+        {
+            body["temperature"] = set.temperature;
+        }
+        if (set.topP >= 0f)
+        {
+            body["top_p"] = set.topP;
+        }
+        if (set.topK >= 0)
+        {
+            body["top_k"] = set.topK;
+        }
+        if (set.minP >= 0f)
+        {
+            body["min_p"] = set.minP;
+        }
+        if (set.presencePenalty >= 0f)
+        {
+            body["presence_penalty"] = set.presencePenalty;
+        }
         if (AiMod.Settings.tools)
         {
             body["tools"] = Tools();
