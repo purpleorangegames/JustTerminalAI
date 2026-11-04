@@ -23,4 +23,5 @@
   <JTA_Testing>asking...</JTA_Testing>
   <JTA_TestGood>works, models: {0}</JTA_TestGood>
   <JTA_TestBad>failed: {0}</JTA_TestBad>
+  <JTA_NoAnswer>no answer in {0} seconds, the model may be stuck writing. The time is in the mod options</JTA_NoAnswer>
 </LanguageData>

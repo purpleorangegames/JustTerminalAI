@@ -567,6 +567,12 @@ public class Session
         {
             return "files go in ~, like ~/lowfood.cron";
         }
+        // only .sh files in ~/bin run by their name
+        string file = path.Substring(path.LastIndexOf('/') + 1);
+        if ((path.StartsWith("~/bin/") || path.StartsWith("/home/bin/")) && !file.Contains('.'))
+        {
+            return "not written, programs end in .sh, write ~/bin/" + file + ".sh and it runs as " + file;
+        }
         if (path.EndsWith(".sh", StringComparison.OrdinalIgnoreCase) && Programs.Check(text) is string bad)
         {
             return "not written, the program has a problem: " + bad;
@@ -656,7 +662,8 @@ public class Session
                 Done = true;
                 if (task.IsFaulted || task.IsCanceled)
                 {
-                    sh.Print("ai: " + (task.IsFaulted ? Client.Reason(task.Exception) : "stopped"), Ink.Bad);
+                    // escape stops it above, so a cancel here is the time running out
+                    sh.Print("ai: " + (task.IsFaulted ? Client.Reason(task.Exception) : "JTA_NoAnswer".Translate(AiMod.Settings.timeout).ToString()), Ink.Bad);
                 }
                 else
                 {
